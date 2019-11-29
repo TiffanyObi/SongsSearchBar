@@ -12,14 +12,29 @@ class SongListViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     
-    var songList = [Song]()
+    @IBOutlet weak var searchBar: UISearchBar!
+    
+    var songList = [Song](){
+        didSet {
+        tableView.reloadData()
+        }
+    }
+    
+    var currentText = "" {
+        didSet {
+            songList = Song.loveSongs.filter { $0.name.lowercased().contains(currentText.lowercased())}
+        }
+    }
+
     
     func loadData() {
         songList = Song.loveSongs
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
+        searchBar.delegate = self
         loadData()
         
     }
@@ -31,6 +46,8 @@ class SongListViewController: UIViewController {
 
 
 }
+
+
 
 extension SongListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -51,3 +68,26 @@ extension SongListViewController: UITableViewDataSource {
     
     
 }
+
+extension SongListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        searchBar.resignFirstResponder()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard !searchText.isEmpty else {
+            loadData()
+            return
+        }
+        
+       currentText = searchText
+        }
+        
+    }
+    
+    
+    
+    
+    
+
