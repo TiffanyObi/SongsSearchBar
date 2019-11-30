@@ -8,6 +8,10 @@
 
 import UIKit
 
+enum SearchScope {
+    case artist
+    case title
+}
 class SongListViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
@@ -20,12 +24,22 @@ class SongListViewController: UIViewController {
         }
     }
     
+    var currentScope = SearchScope.artist
+    
     var currentText = "" {
         didSet {
-            songList = Song.loveSongs.filter { $0.name.lowercased().contains(currentText.lowercased())}
+            switch currentScope {
+            case .artist:
+                songList = Song.loveSongs.filter {
+                    $0.artist.lowercased().contains(currentText.lowercased())
+                }
+            case .title:
+                songList = Song.loveSongs.filter {
+                    $0.name.lowercased().contains(currentText.lowercased())
+                }
         }
     }
-
+}
     
     func loadData() {
         songList = Song.loveSongs
@@ -44,8 +58,24 @@ class SongListViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let songDetailController = segue.destination as? SongDetailsViewController,
+            let indexPath = tableView.indexPathForSelectedRow
+                else {
+            fatalError("Could not locate  iew controller")
+        }
+        
+        let selectedSong = songList[indexPath.row]
+            
+        songDetailController.selectedSong = selectedSong
+           
+            
+            
+        }
+        
+    }
 
-}
+
 
 
 
@@ -82,7 +112,25 @@ extension SongListViewController: UISearchBarDelegate {
         }
         
        currentText = searchText
+        
+       
         }
+    
+    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        
+        tableView.reloadData()
+        
+        switch selectedScope {
+            
+        case 0:
+            currentScope = .artist
+            
+        case 1:
+            currentScope = .title
+        default:
+            print("Not a valid code.")
+        }
+    }
         
     }
     
